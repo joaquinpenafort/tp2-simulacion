@@ -1,7 +1,9 @@
 from libreria import *
 import sys
 import math
-import scipy.stats as stats  # Necesario para las funciones de distribución
+import scipy.stats as stats
+from openpyxl import Workbook
+from openpyxl.chart import BarChart, Reference
 
 def expected_normal_frequencies(mu, sigma, n, bins, min_val, max_val):
     width = (max_val - min_val) / bins
@@ -102,6 +104,40 @@ def main():
             print("✅ No se puede rechazar H₀: los datos siguen la distribución esperada.")
         else:
             print("❌ Se rechaza H₀: los datos NO siguen la distribución esperada.")
+
+        # -------------------------------
+        # Exportar a Excel con gráfico
+        # -------------------------------
+        nombre_archivo = input("Ingrese el nombre del archivo Excel de salida (ej. salida.xlsx): ")
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Distribución"
+
+        ws.append(["Bin / Valor", "Frecuencia Observada", "Frecuencia Esperada"])
+        for i in range(len(observed)):
+            label = (
+                f"[{round(a + i * (b - a)/bins, 2)}, {round(a + (i + 1) * (b - a)/bins, 2)})"
+                if opcion != "4" else str(a + i)
+            )
+            ws.append([label, observed[i], round(expected[i], 2)])
+
+        chart = BarChart()
+        chart.title = "Frecuencias Observadas vs Esperadas"
+        chart.x_axis.title = "Intervalo"
+        chart.y_axis.title = "Frecuencia"
+        chart.type = "col"
+        chart.style = 10
+        chart.width = 20
+        chart.height = 10
+
+        data = Reference(ws, min_col=2, max_col=3, min_row=1, max_row=len(observed)+1)
+        cats = Reference(ws, min_col=1, min_row=2, max_row=len(observed)+1)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        ws.add_chart(chart, "E2")
+
+        wb.save(nombre_archivo+".xlsx")
+        print(f"📊 Archivo con gráfico guardado como: {nombre_archivo}")
 
 if __name__ == "__main__":
     main()
