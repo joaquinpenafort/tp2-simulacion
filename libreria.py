@@ -97,12 +97,6 @@ def build_histogram(data, bins, min_val=None, max_val=None):
         frequencies[index] += 1
     return frequencies, min_val, width
 
-# ------------------------------------------------------
-# Calcular frecuencias esperadas teóricas para una distribución
-# ------------------------------------------------------
-# Solo implementado para distribución uniforme continua
-# Para otras distribuciones, se debe agregar la fórmula de la función de densidad integrada en cada bin.
-def expected_uniform_frequencies(a, b, n, bins):
-    return [n / bins] * bins
+
 
 

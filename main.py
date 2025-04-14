@@ -5,6 +5,10 @@ import scipy.stats as stats
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
 
+
+def expected_uniform_frequencies(a, b, n, bins):
+    return [n / bins] * bins
+
 def expected_normal_frequencies(mu, sigma, n, bins, min_val, max_val):
     width = (max_val - min_val) / bins
     expected = []
@@ -48,13 +52,17 @@ def main():
             sys.exit()
 
         n = int(input("Ingrese el número de datos a generar: "))
+        intervalos = int(input("Ingrese la cantidad de intervalos que desea (0 si desea omitir, se usará √n):"))
         alpha = 0.05
 
         if opcion == "1":
             a = float(input("Ingrese el valor mínimo (a): "))
             b = float(input("Ingrese el valor máximo (b): "))
             data = generate_uniform(a, b, n)
-            bins = math.ceil(math.sqrt(n))
+            if intervalos == 0:
+                bins = math.ceil(math.sqrt(n))
+            else:
+                bins = intervalos
             expected = expected_uniform_frequencies(a, b, n, bins)
 
         elif opcion == "2":
@@ -63,7 +71,10 @@ def main():
             data = generate_normal(mu, sigma, n)
             a = min(data)
             b = max(data)
-            bins = math.ceil(math.sqrt(n))
+            if intervalos == 0:
+                bins = math.ceil(math.sqrt(n))
+            else:
+                bins = intervalos
             expected = expected_normal_frequencies(mu, sigma, n, bins, a, b)
 
         elif opcion == "3":
@@ -71,7 +82,10 @@ def main():
             data = generate_exponential(lambd, n)
             a = min(data)
             b = max(data)
-            bins = math.ceil(math.sqrt(n))
+            if intervalos == 0:
+                bins = math.ceil(math.sqrt(n))
+            else:
+                bins = intervalos
             expected = expected_exponential_frequencies(lambd, n, bins, a, b)
 
         elif opcion == "4":
@@ -79,7 +93,11 @@ def main():
             data = generate_poisson(lambd, n)
             a = int(min(data))
             b = int(max(data))
-            bins = b - a + 1
+            if intervalos == 0:
+                bins = b - a + 1
+            else:
+                bins = intervalos
+
             expected = expected_poisson_frequencies(lambd, n, bins, a)
 
         else:
