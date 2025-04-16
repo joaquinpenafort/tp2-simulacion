@@ -51,60 +51,95 @@ def main():
             print("¡Hasta luego!")
             sys.exit()
 
-        n = int(input("Ingrese el número de datos a generar: "))
-        intervalos = int(input("Ingrese la cantidad de intervalos que desea (0 si desea omitir, se usará √n):"))
-        alpha = 0.05
+        try:
+            n = int(input("Ingrese el número de datos a generar: "))
+            if n <= 0:
+                print("❌ El número de datos debe ser mayor que 0.")
+                continue
+
+            intervalos = int(input("Ingrese la cantidad de intervalos que desea (0 si desea omitir, se usará √n):"))
+            if intervalos < 0:
+                print("❌ La cantidad de intervalos no puede ser negativa.")
+                continue
+        except ValueError:
+            print("❌ Entrada inválida. Ingrese valores numéricos.")
+            continue
+
+        alpha = float(input("Ingrese el nivel de significancia (α): "))
+        while alpha < 0:
+            print("Alpha no puede ser negativo, ingreselo nuevamente")
+            alpha = float(input("Ingrese el nivel de significancia (α): "))
+
+
 
         if opcion == "1":
-            a = float(input("Ingrese el valor mínimo (a): "))
-            b = float(input("Ingrese el valor máximo (b): "))
+            try:
+                a = float(input("Ingrese el valor mínimo (a): "))
+                b = float(input("Ingrese el valor máximo (b): "))
+                if b <= a:
+                    print("❌ El valor máximo debe ser mayor que el valor mínimo.")
+                    continue
+            except ValueError:
+                print("❌ Entrada inválida.")
+                continue
+
             data = generate_uniform(a, b, n)
-            if intervalos == 0:
-                bins = math.ceil(math.sqrt(n))
-            else:
-                bins = intervalos
+            bins = math.ceil(math.sqrt(n)) if intervalos == 0 else intervalos
             expected = expected_uniform_frequencies(a, b, n, bins)
 
         elif opcion == "2":
-            mu = float(input("Ingrese la media (μ) (0 si la desconoce): "))
-            sigma = float(input("Ingrese la desviación estándar (σ) (1 si la desconoce): "))
+            try:
+                mu = float(input("Ingrese la media (μ) (0 si la desconoce): "))
+                sigma = float(input("Ingrese la desviación estándar (σ) (1 si la desconoce): "))
+                if sigma <= 0:
+                    print("❌ La desviación estándar debe ser mayor que 0.")
+                    continue
+            except ValueError:
+                print("❌ Entrada inválida.")
+                continue
+
             data = generate_normal(mu, sigma, n)
             a = min(data)
             b = max(data)
-            if intervalos == 0:
-                bins = math.ceil(math.sqrt(n))
-            else:
-                bins = intervalos
+            bins = math.ceil(math.sqrt(n)) if intervalos == 0 else intervalos
             expected = expected_normal_frequencies(mu, sigma, n, bins, a, b)
 
         elif opcion == "3":
-            lambd = float(input("Ingrese el valor de λ: "))
+            try:
+                lambd = float(input("Ingrese el valor de λ: "))
+                if lambd <= 0:
+                    print("❌ λ debe ser mayor que 0.")
+                    continue
+            except ValueError:
+                print("❌ Entrada inválida.")
+                continue
+
             data = generate_exponential(lambd, n)
             a = min(data)
             b = max(data)
-            if intervalos == 0:
-                bins = math.ceil(math.sqrt(n))
-            else:
-                bins = intervalos
+            bins = math.ceil(math.sqrt(n)) if intervalos == 0 else intervalos
             expected = expected_exponential_frequencies(lambd, n, bins, a, b)
 
         elif opcion == "4":
-            lambd = float(input("Ingrese el valor de λ: "))
+            try:
+                lambd = float(input("Ingrese el valor de λ: "))
+                if lambd <= 0:
+                    print("❌ λ debe ser mayor que 0.")
+                    continue
+            except ValueError:
+                print("❌ Entrada inválida.")
+                continue
+
             data = generate_poisson(lambd, n)
             a = int(min(data))
             b = int(max(data))
-            if intervalos == 0:
-                bins = b - a + 1
-            else:
-                bins = intervalos
-
+            bins = b - a + 1 if intervalos == 0 else intervalos
             expected = expected_poisson_frequencies(lambd, n, bins, a)
 
         else:
             print("Opción no válida. Intente de nuevo.")
             continue
 
-        # Convertir a float nativo
         expected = [float(x) for x in expected]
 
         observed, _, _ = build_histogram(data, bins, a, b if opcion != "4" else b + 1)
@@ -117,7 +152,12 @@ def main():
         print("Valor Chi-Cuadrado:", round(chi2, 4))
         print("Grados de libertad:", v)
 
-        valor_critico = float(input(f"Ingrese el valor crítico de Chi-Cuadrado (α={alpha}, gl={v}): "))
+        try:
+            valor_critico = float(input(f"Ingrese el valor crítico de Chi-Cuadrado (α={alpha}, gl={v}): "))
+        except ValueError:
+            print("❌ Entrada inválida para el valor crítico.")
+            continue
+
         if chi2 <= valor_critico:
             print("✅ No se puede rechazar H₀: los datos siguen la distribución esperada.")
         else:
